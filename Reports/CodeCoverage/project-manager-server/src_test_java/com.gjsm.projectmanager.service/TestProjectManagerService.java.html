@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TestProjectManagerService.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">project-manager-server (4) (Jan 18, 2019 6:10:05 PM)</a> &gt; <a href="../../index.html" class="el_group">project-manager-server</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.gjsm.projectmanager.service</a> &gt; <span class="el_source">TestProjectManagerService.java</span></div><h1>TestProjectManagerService.java</h1><pre class="source lang-java linenums">package com.gjsm.projectmanager.service;
+
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.gjsm.projectmanager.dao.ParentTaskRepository;
+import com.gjsm.projectmanager.dao.ProjectRepository;
+import com.gjsm.projectmanager.dao.TaskRepository;
+import com.gjsm.projectmanager.dao.UserRepository;
+import com.gjsm.projectmanager.jpaentity.ParentEntity;
+import com.gjsm.projectmanager.jpaentity.ProjectEntity;
+import com.gjsm.projectmanager.jpaentity.TaskEntity;
+import com.gjsm.projectmanager.jpaentity.UserEntity;
+import com.gjsm.projectmanager.request.GetParentRequest;
+import com.gjsm.projectmanager.request.GetProjectRequest;
+import com.gjsm.projectmanager.request.GetTaskRequest;
+import com.gjsm.projectmanager.request.GetUserRequest;
+import com.gjsm.projectmanager.service.impl.ProjectManagerServiceImpl;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@TestPropertySource(&quot;classpath:application.properties&quot;)
+@ActiveProfiles(&quot;test&quot;)
+<span class="fc" id="L49">public class TestProjectManagerService {</span>
+	
+<span class="fc" id="L51">	private final Logger logger = LoggerFactory.getLogger(this.getClass());</span>
+	
+	private static final String SUCCESS = &quot;Success&quot;;
+	
+	@MockBean
+	private UserRepository userRepository;
+	
+	@MockBean
+	private ProjectRepository projectRepository;
+	
+	@MockBean
+	private ParentTaskRepository parentTaskRepository;
+	
+	@MockBean
+	private TaskRepository taskRepository;
+	
+	@Autowired
+    private ProjectManagerService projectManagerService;
+	
+	@Configuration
+<span class="fc" id="L71">	static class ProjectManagerServiceTestContextConfiguration {</span>
+		@Bean
+		public ProjectManagerService projectManagerService() {
+<span class="fc" id="L74">			return new ProjectManagerServiceImpl();</span>
+		}
+	}
+
+	@Before
+    public void setUp() throws Exception {
+<span class="fc" id="L80">		given(userRepository.findAll()).willReturn(getMockUser());</span>
+<span class="fc" id="L81">		given(projectRepository.findAll()).willReturn(getMockProject());</span>
+<span class="fc" id="L82">		given(parentTaskRepository.findAll()).willReturn(getMockParentTask());</span>
+<span class="fc" id="L83">		given(taskRepository.findByProjectId(1)).willReturn(getMockTask());</span>
+<span class="fc" id="L84">		given(projectRepository.findByUserId(1)).willReturn(getMockProjEnt());</span>
+<span class="fc" id="L85">	}</span>
+	
+	@Test
+	public void test_getUserService() throws Exception {
+<span class="fc" id="L89">		assertNotNull(projectManagerService.getUser());</span>
+<span class="fc" id="L90">	}</span>
+	
+	@Test
+	public void test_getProjectService() throws Exception {
+<span class="fc" id="L94">		assertNotNull(projectManagerService.getProject());</span>
+<span class="fc" id="L95">	}</span>
+	
+	@Test
+	public void test_getParentTaskService() throws Exception {
+<span class="fc" id="L99">		assertNotNull(projectManagerService.getParentTask());</span>
+<span class="fc" id="L100">	}</span>
+	
+	@Test
+	public void test_getTaskService() throws Exception {
+<span class="fc" id="L104">		assertNotNull(projectManagerService.viewTask(1));</span>
+<span class="fc" id="L105">	}</span>
+	
+	@Test
+	public void test_update_addUserService() throws Exception {
+<span class="fc" id="L109">		assertNotNull(projectManagerService.updateUser(getMockUser_forAdd()));</span>
+<span class="fc" id="L110">		assertEquals(&quot;Success&quot;, projectManagerService.updateUser(getMockUser_forAdd()));</span>
+<span class="fc" id="L111">	}</span>
+	
+	@Test
+	public void test_update_addProjectService() throws Exception {
+<span class="fc" id="L115">		assertNotNull(projectManagerService.updateProject(getMockProject_forAdd()));</span>
+<span class="fc" id="L116">		assertEquals(SUCCESS, projectManagerService.updateProject(getMockProject_forAdd()));</span>
+<span class="fc" id="L117">	}</span>
+	
+	@Test
+	public void test_update_addParentTaskService() throws Exception {
+<span class="fc" id="L121">		assertNotNull(projectManagerService.updateParentTask(getMockParentTask_forAdd()));</span>
+<span class="fc" id="L122">		assertEquals(SUCCESS, projectManagerService.updateParentTask(getMockParentTask_forAdd()));</span>
+<span class="fc" id="L123">	}</span>
+	
+	@Test
+	public void test_update_addTaskService() throws Exception {
+<span class="fc" id="L127">		assertNotNull(projectManagerService.updateTask(getMockTask_forAdd()));</span>
+<span class="nc" id="L128">		assertEquals(SUCCESS, projectManagerService.updateTask(getMockTask_forAdd()));</span>
+<span class="nc" id="L129">	}</span>
+	
+	@Test
+	public void test_update_deleteUserService() throws Exception {
+<span class="fc" id="L133">		assertNotNull(projectManagerService.updateUser(getMockUser_forDelete()));</span>
+<span class="fc" id="L134">		assertEquals(&quot;Success&quot;, projectManagerService.updateUser(getMockUser_forDelete()));</span>
+<span class="fc" id="L135">	}</span>
+	
+	@Test
+	public void test_update_deleteProjectService() throws Exception {
+<span class="fc" id="L139">		assertNotNull(projectManagerService.updateProject(getMockProject_forDelete()));</span>
+<span class="fc" id="L140">		assertEquals(SUCCESS, projectManagerService.updateProject(getMockProject_forDelete()));</span>
+<span class="fc" id="L141">	}</span>
+	
+	@Test
+	public void test_update_deleteParentTaskService() throws Exception {
+<span class="fc" id="L145">		assertNotNull(projectManagerService.updateParentTask(getMockParentTask_forDelete()));</span>
+<span class="nc" id="L146">		assertEquals(SUCCESS, projectManagerService.updateParentTask(getMockParentTask_forDelete()));</span>
+<span class="nc" id="L147">	}</span>
+	
+	@Test
+	public void test_update_deleteTaskService() throws Exception {
+<span class="fc" id="L151">		assertNotNull(projectManagerService.updateTask(getMockTask_forDelete()));</span>
+<span class="fc" id="L152">		assertEquals(SUCCESS, projectManagerService.updateTask(getMockTask_forDelete()));</span>
+<span class="fc" id="L153">	}</span>
+	
+	private List&lt;UserEntity&gt; getMockUser() {
+<span class="fc" id="L156">		Gson gson = new Gson();</span>
+<span class="fc" id="L157">		List&lt;UserEntity&gt; res = new ArrayList&lt;UserEntity&gt;();</span>
+		try {
+<span class="fc" id="L159">			UserEntity ent = gson.fromJson(new FileReader(&quot;mock/getUserRes.json&quot;), UserEntity.class);</span>
+<span class="fc" id="L160">			res.add(ent);</span>
+<span class="pc" id="L161">        } catch (Exception e) { </span>
+            //logger.error(&quot;Exception in TestProjectManagerService getMockUser : &quot; + e);
+        }
+<span class="fc" id="L164">		return res;</span>
+	}
+
+	private List&lt;ProjectEntity&gt; getMockProject() {
+<span class="fc" id="L168">		Gson gson = new Gson();</span>
+<span class="fc" id="L169">		List&lt;ProjectEntity&gt; res = new ArrayList&lt;ProjectEntity&gt;();</span>
+		try {
+<span class="fc" id="L171">			ProjectEntity ent = gson.fromJson(new FileReader(&quot;mock/getProjectRes.json&quot;), ProjectEntity.class);</span>
+<span class="fc" id="L172">			res.add(ent);</span>
+<span class="pc" id="L173">        } catch (Exception e) {</span>
+        	//logger.error(&quot;Exception in TestProjectManagerService getMockProject : &quot; + e);
+        }
+<span class="fc" id="L176">		return res;</span>
+	}
+	
+	private List&lt;ParentEntity&gt; getMockParentTask() {
+<span class="fc" id="L180">		Gson gson = new Gson();</span>
+<span class="fc" id="L181">		List&lt;ParentEntity&gt; res = new ArrayList&lt;ParentEntity&gt;();</span>
+		try {
+<span class="nc" id="L183">			ParentEntity ent = gson.fromJson(new FileReader(&quot;mock/getParentTaskRes.json&quot;), ParentEntity.class);</span>
+<span class="nc" id="L184">			res.add(ent);</span>
+<span class="pc" id="L185">        } catch (Exception e) {</span>
+        	//logger.error(&quot;Exception in TestProjectManagerService getMockParentTask : &quot; + e);
+        }
+<span class="fc" id="L188">		return res;</span>
+	}
+	
+	private List&lt;TaskEntity&gt; getMockTask() {
+<span class="fc" id="L192">		Gson gson = new Gson();</span>
+<span class="fc" id="L193">		List&lt;TaskEntity&gt; res = new ArrayList&lt;TaskEntity&gt;();</span>
+		try {
+<span class="fc" id="L195">			TaskEntity ent = gson.fromJson(new FileReader(&quot;mock/getTaskEntRes.json&quot;), TaskEntity.class);</span>
+<span class="fc" id="L196">			res.add(ent);</span>
+<span class="pc" id="L197">        } catch (Exception e) {</span>
+        	//logger.error(&quot;Exception in TestProjectManagerService getMockTask : &quot; + e);
+        }
+<span class="fc" id="L200">		return res;</span>
+	}
+	
+	private ProjectEntity getMockProjEnt() {
+<span class="fc" id="L204">		Gson gson = new Gson();</span>
+<span class="fc" id="L205">		ProjectEntity res = new ProjectEntity();</span>
+		try {
+<span class="fc" id="L207">			res = gson.fromJson(new FileReader(&quot;mock/projectEntRes.json&quot;), ProjectEntity.class);</span>
+<span class="pc" id="L208">        } catch (Exception e) {</span>
+        	//logger.error(&quot;Exception in TestProjectManagerService getMockTask : &quot; + e);
+        }
+<span class="fc" id="L211">		return res;</span>
+	}
+	
+	private GetUserRequest getMockUser_forAdd() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L215">		Gson gson = new Gson();</span>
+<span class="fc" id="L216">		GetUserRequest req = new GetUserRequest();</span>
+<span class="fc" id="L217">		req = gson.fromJson(new FileReader(&quot;mock/addUserReq.json&quot;), GetUserRequest.class);</span>
+<span class="fc" id="L218">		return req;</span>
+	}
+	
+	private GetProjectRequest getMockProject_forAdd() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L222">		Gson gson = new Gson();</span>
+<span class="fc" id="L223">		GetProjectRequest req = new GetProjectRequest();</span>
+<span class="fc" id="L224">		req = gson.fromJson(new FileReader(&quot;mock/addProjectReq.json&quot;), GetProjectRequest.class);</span>
+<span class="fc" id="L225">		return req;</span>
+	}
+	
+	private GetParentRequest getMockParentTask_forAdd() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L229">		Gson gson = new Gson();</span>
+<span class="fc" id="L230">		GetParentRequest req = new GetParentRequest();</span>
+<span class="fc" id="L231">		req = gson.fromJson(new FileReader(&quot;mock/addParentTaskReq.json&quot;), GetParentRequest.class);</span>
+<span class="fc" id="L232">		return req;</span>
+	}
+	
+	private GetTaskRequest getMockTask_forAdd() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L236">		Gson gson = new Gson();</span>
+<span class="fc" id="L237">		GetTaskRequest req = new GetTaskRequest();</span>
+<span class="fc" id="L238">		req = gson.fromJson(new FileReader(&quot;mock/addTaskReq.json&quot;), GetTaskRequest.class);</span>
+<span class="fc" id="L239">		return req;</span>
+	}
+	
+	private GetUserRequest getMockUser_forDelete() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L243">		Gson gson = new Gson();</span>
+<span class="fc" id="L244">		GetUserRequest req = new GetUserRequest();</span>
+<span class="fc" id="L245">		req = gson.fromJson(new FileReader(&quot;mock/deleteUserReq.json&quot;), GetUserRequest.class);</span>
+<span class="fc" id="L246">		return req;</span>
+	}
+	
+	private GetProjectRequest getMockProject_forDelete() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L250">		Gson gson = new Gson();</span>
+<span class="fc" id="L251">		GetProjectRequest req = new GetProjectRequest();</span>
+<span class="fc" id="L252">		req = gson.fromJson(new FileReader(&quot;mock/deleteProjectReq.json&quot;), GetProjectRequest.class);</span>
+<span class="fc" id="L253">		return req;</span>
+	}
+	
+	private GetParentRequest getMockParentTask_forDelete() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L257">		Gson gson = new Gson();</span>
+<span class="fc" id="L258">		GetParentRequest req = new GetParentRequest();</span>
+<span class="fc" id="L259">		req = gson.fromJson(new FileReader(&quot;mock/deleteParentTaskReq.json&quot;), GetParentRequest.class);</span>
+<span class="fc" id="L260">		return req;</span>
+	}
+	
+	private GetTaskRequest getMockTask_forDelete() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L264">		Gson gson = new Gson();</span>
+<span class="fc" id="L265">		GetTaskRequest req = new GetTaskRequest();</span>
+<span class="fc" id="L266">		req = gson.fromJson(new FileReader(&quot;mock/deleteTaskReq.json&quot;), GetTaskRequest.class);</span>
+<span class="fc" id="L267">		return req;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>project-manager-server (4) (Jan 18, 2019 6:10:05 PM)</div></body></html>

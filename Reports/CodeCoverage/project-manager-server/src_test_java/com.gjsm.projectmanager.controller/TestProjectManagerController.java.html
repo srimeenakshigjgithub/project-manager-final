@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TestProjectManagerController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">project-manager-server (4) (Jan 18, 2019 6:10:05 PM)</a> &gt; <a href="../../index.html" class="el_group">project-manager-server</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.gjsm.projectmanager.controller</a> &gt; <span class="el_source">TestProjectManagerController.java</span></div><h1>TestProjectManagerController.java</h1><pre class="source lang-java linenums">package com.gjsm.projectmanager.controller;
+
+	
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.gjsm.projectmanager.exception.ProjectManagerException;
+import com.gjsm.projectmanager.request.GetParentRequest;
+import com.gjsm.projectmanager.request.GetProjectRequest;
+import com.gjsm.projectmanager.request.GetTaskRequest;
+import com.gjsm.projectmanager.request.GetUserRequest;
+import com.gjsm.projectmanager.response.GetParentResponse;
+import com.gjsm.projectmanager.response.GetProjectResponse;
+import com.gjsm.projectmanager.response.GetTaskResponse;
+import com.gjsm.projectmanager.response.GetUserResponse;
+import com.gjsm.projectmanager.service.ProjectManagerService;
+import com.gjsm.projectmanager.service.impl.ProjectManagerServiceImpl;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
+@TestPropertySource(&quot;classpath:application.properties&quot;)
+@ActiveProfiles(&quot;test&quot;)
+<span class="fc" id="L49">public class TestProjectManagerController {</span>
+
+	@Autowired
+	private MockMvc mockMvc;
+
+	@MockBean
+	private ProjectManagerService projectManagerServiceImpl;
+	
+	@Configuration
+<span class="fc" id="L58">	static class ProjectManagerServiceTestContextConfiguration {</span>
+		@Bean
+		public ProjectManagerService projectManagerService() {
+<span class="nc" id="L61">			return new ProjectManagerServiceImpl();</span>
+		}
+	}
+
+	@Test
+	public void test_getUser_endpoint() throws Exception {
+<span class="fc" id="L67">		given(projectManagerServiceImpl.getUser()).willReturn(getMockUser());</span>
+<span class="fc" id="L68">		this.mockMvc</span>
+<span class="fc" id="L69">				.perform(get(&quot;/getUser&quot;).contentType(MediaType.APPLICATION_JSON).header(&quot;Accept&quot;, &quot;*/*&quot;))</span>
+<span class="nc" id="L70">				.andExpect(status().isOk());</span>
+<span class="nc" id="L71">	}</span>
+
+	@Test
+	public void test_getProject_endpoint() throws Exception {
+<span class="fc" id="L75">		given(projectManagerServiceImpl.getProject()).willReturn(getMockProject());</span>
+<span class="fc" id="L76">		this.mockMvc.perform(get(&quot;/getProject&quot;).contentType(MediaType.APPLICATION_JSON))</span>
+<span class="nc" id="L77">				.andExpect(status().isOk());</span>
+<span class="nc" id="L78">	}</span>
+
+	@Test
+	public void test_getParentTask_endpoint() throws Exception {
+<span class="fc" id="L82">		given(projectManagerServiceImpl.getParentTask()).willReturn(getMockParentTask());</span>
+<span class="fc" id="L83">		this.mockMvc.perform(get(&quot;/getParentTask&quot;).contentType(MediaType.APPLICATION_JSON))</span>
+<span class="nc" id="L84">				.andExpect(status().isOk());</span>
+<span class="nc" id="L85">	}</span>
+
+	@Test
+	public void test_getTask_endpoint() throws Exception {
+<span class="fc" id="L89">		given(projectManagerServiceImpl.viewTask(1)).willReturn(getMockTask());</span>
+<span class="fc" id="L90">		this.mockMvc.perform(</span>
+<span class="fc" id="L91">				post(&quot;/viewTask&quot;).contentType(MediaType.APPLICATION_JSON).content(createTaskIdJson()))</span>
+<span class="nc" id="L92">				.andExpect(status().isOk());</span>
+<span class="nc" id="L93">	}</span>
+	@Test
+	public void test_update_addUser_endpoint() throws Exception {
+<span class="fc" id="L96">		given(projectManagerServiceImpl.updateUser(getMockUser_forAdd())).willReturn(&quot;Success&quot;);</span>
+<span class="fc" id="L97">		this.mockMvc.perform(post(&quot;/updateUser&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="pc" id="L98">				.content(createModifyUserJson())).andExpect(status().isOk());</span>
+<span class="nc" id="L99">	}</span>
+
+	@Test
+	public void test_update_addProject_endpoint() throws Exception {
+<span class="fc" id="L103">		given(projectManagerServiceImpl.updateProject(getMockProject_forAdd())).willReturn(&quot;Success&quot;);</span>
+<span class="fc" id="L104">		this.mockMvc.perform(post(&quot;/updateProject&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="pc" id="L105">				.content(createModifyProjectJson())).andExpect(status().isOk());</span>
+<span class="nc" id="L106">	}</span>
+
+	@Test
+	public void test_update_addParentTask_endpoint() throws Exception {
+<span class="fc" id="L110">		given(projectManagerServiceImpl.updateParentTask(getMockParentTask_forAdd())).willReturn(&quot;Success&quot;);</span>
+<span class="fc" id="L111">		this.mockMvc.perform(post(&quot;/updateParentTask&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="pc" id="L112">				.content(createModifyParentTaskJson())).andExpect(status().isOk());</span>
+<span class="nc" id="L113">	}</span>
+
+	@Test
+	public void test_update_addTask_endpoint() throws Exception {
+<span class="fc" id="L117">		given(projectManagerServiceImpl.updateTask(getMockTask_forAdd())).willReturn(&quot;Success&quot;);</span>
+<span class="fc" id="L118">		this.mockMvc.perform(post(&quot;/updateTask&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="pc" id="L119">				.content(createModifyTaskJson())).andExpect(status().isOk());</span>
+<span class="nc" id="L120">	}</span>
+
+	@Test
+	public void test_getUserexception() throws Exception {
+<span class="fc" id="L124">		given(projectManagerServiceImpl.getUser()).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L125">		this.mockMvc.perform(get(&quot;/getUser&quot;).contentType(MediaType.APPLICATION_PDF_VALUE)</span>
+<span class="nc" id="L126">				).andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L127">	}</span>
+
+	@Test
+	public void test_getProjectexception() throws Exception {
+<span class="fc" id="L131">		given(projectManagerServiceImpl.getProject()).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L132">		this.mockMvc.perform(get(&quot;/getProject&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="pc" id="L133">				.accept(MediaType.APPLICATION_XML)).andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L134">	}</span>
+
+	@Test
+	public void test_getParentTaskexception() throws Exception {
+<span class="fc" id="L138">		given(projectManagerServiceImpl.getParentTask()).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L139">		this.mockMvc.perform(get(&quot;/getParentTask&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="pc" id="L140">				.accept(MediaType.APPLICATION_XML)).andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L141">	}</span>
+
+	@Test
+	public void test_getTaskexception() throws Exception {
+<span class="fc" id="L145">		given(projectManagerServiceImpl.viewTask(1)).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L146">		this.mockMvc</span>
+<span class="fc" id="L147">				.perform(post(&quot;/viewTask&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L148">						.accept(MediaType.APPLICATION_XML).content(createTaskIdJson()))</span>
+<span class="nc" id="L149">				.andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L150">	}</span>
+
+	@Test
+	public void test_updateUserexception() throws Exception {
+<span class="fc" id="L154">		given(projectManagerServiceImpl.updateUser(any(GetUserRequest.class))).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L155">		this.mockMvc</span>
+<span class="fc" id="L156">				.perform(post(&quot;/updateUser&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L157">						.accept(MediaType.APPLICATION_XML).content(createModifyUserJson()))</span>
+<span class="nc" id="L158">				.andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L159">	}</span>
+
+	@Test
+	public void test_updateProjectexception() throws Exception {
+<span class="fc" id="L163">		given(projectManagerServiceImpl.updateProject(any(GetProjectRequest.class))).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L164">		this.mockMvc</span>
+<span class="fc" id="L165">				.perform(post(&quot;/updateProject&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L166">						.accept(MediaType.APPLICATION_JSON).content(createModifyProjErr()))</span>
+<span class="nc" id="L167">				.andExpect(status().is5xxServerError()); </span>
+<span class="nc" id="L168">	}</span>
+
+	@Test
+	public void test_updateParentTaskexception() throws Exception {
+<span class="fc" id="L172">		given(projectManagerServiceImpl.updateParentTask(any(GetParentRequest.class)))</span>
+<span class="fc" id="L173">				.willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L174">		this.mockMvc</span>
+<span class="fc" id="L175">				.perform(post(&quot;/updateParentTask&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L176">						.accept(MediaType.APPLICATION_XML).content(createModifyParentTaskJson()))</span>
+<span class="nc" id="L177">				.andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L178">	}</span>
+
+	@Test
+	public void test_updateTaskexception() throws Exception {
+<span class="fc" id="L182">		given(projectManagerServiceImpl.updateTask(any(GetTaskRequest.class))).willThrow(new ProjectManagerException(&quot;&quot;, &quot;&quot;, 500));</span>
+<span class="fc" id="L183">		this.mockMvc</span>
+<span class="fc" id="L184">				.perform(post(&quot;/updateTask&quot;).contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L185">						.accept(MediaType.APPLICATION_XML).content(createModifyTaskJson()))</span>
+<span class="nc" id="L186">				.andExpect(status().is5xxServerError());</span>
+<span class="nc" id="L187">	}</span>
+
+	
+	private GetUserResponse getMockUser() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L191">		Gson gson = new Gson();</span>
+<span class="fc" id="L192">		GetUserResponse res = new GetUserResponse();</span>
+<span class="fc" id="L193">		res = gson.fromJson(new FileReader(&quot;mock/getUserRes.json&quot;), GetUserResponse.class);</span>
+<span class="fc" id="L194">		return res;</span>
+	}
+
+	private GetProjectResponse getMockProject() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L198">		Gson gson = new Gson();</span>
+<span class="fc" id="L199">		GetProjectResponse res = new GetProjectResponse();</span>
+<span class="fc" id="L200">		res = gson.fromJson(new FileReader(&quot;mock/getProjectRes.json&quot;), GetProjectResponse.class);</span>
+<span class="fc" id="L201">		return res;</span>
+	}
+
+	private GetParentResponse getMockParentTask()
+			throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L206">		Gson gson = new Gson();</span>
+<span class="fc" id="L207">		GetParentResponse res = new GetParentResponse();</span>
+<span class="fc" id="L208">		res = gson.fromJson(new FileReader(&quot;mock/getParentTaskRes.json&quot;), GetParentResponse.class);</span>
+<span class="fc" id="L209">		return res;</span>
+	}
+
+	private GetTaskResponse getMockTask() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L213">		Gson gson = new Gson();</span>
+<span class="fc" id="L214">		GetTaskResponse res = new GetTaskResponse();</span>
+<span class="fc" id="L215">		res = gson.fromJson(new FileReader(&quot;mock/getTaskRes.json&quot;), GetTaskResponse.class);</span>
+<span class="fc" id="L216">		return res;</span>
+	}
+
+	private GetUserRequest getMockUser_forAdd() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L220">		Gson gson = new Gson();</span>
+<span class="fc" id="L221">		GetUserRequest req = new GetUserRequest();</span>
+<span class="fc" id="L222">		req = gson.fromJson(new FileReader(&quot;mock/addUserReq.json&quot;), GetUserRequest.class);</span>
+<span class="fc" id="L223">		return req;</span>
+	}
+
+	private GetProjectRequest getMockProject_forAdd()
+			throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L228">		Gson gson = new Gson();</span>
+<span class="fc" id="L229">		GetProjectRequest req = new GetProjectRequest();</span>
+<span class="fc" id="L230">		req = gson.fromJson(new FileReader(&quot;mock/addProjectReq.json&quot;), GetProjectRequest.class);</span>
+<span class="fc" id="L231">		return req;</span>
+	}
+
+	private GetParentRequest getMockParentTask_forAdd()
+			throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L236">		Gson gson = new Gson();</span>
+<span class="fc" id="L237">		GetParentRequest req = new GetParentRequest();</span>
+<span class="fc" id="L238">		req = gson.fromJson(new FileReader(&quot;mock/addParentTaskReq.json&quot;), GetParentRequest.class);</span>
+<span class="fc" id="L239">		return req;</span>
+	}
+
+	private GetTaskRequest getMockTask_forAdd() throws JsonSyntaxException, JsonIOException, FileNotFoundException {
+<span class="fc" id="L243">		Gson gson = new Gson();</span>
+<span class="fc" id="L244">		GetTaskRequest req = new GetTaskRequest();</span>
+<span class="fc" id="L245">		req = gson.fromJson(new FileReader(&quot;mock/addTaskReq.json&quot;), GetTaskRequest.class);</span>
+<span class="fc" id="L246">		return req;</span>
+	}
+
+	
+	private static String createTaskIdJson() {
+<span class="fc" id="L251">		return &quot;{\&quot;task\&quot; : {\&quot;projectId\&quot; : 1}}&quot;;</span>
+	}
+	
+	private String createModifyUserJson() throws Exception {
+<span class="fc" id="L255">		String content = &quot;&quot;;</span>
+<span class="fc" id="L256">		BufferedReader reader = new BufferedReader(new FileReader(&quot;mock/addUserReq.json&quot;));</span>
+<span class="fc" id="L257">		StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc" id="L258">		String line = null;</span>
+<span class="fc" id="L259">		String ls = System.getProperty(&quot;line.separator&quot;);</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">		while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L261">			stringBuilder.append(line);</span>
+<span class="fc" id="L262">			stringBuilder.append(ls);</span>
+		}
+		// delete the last new line separator
+<span class="fc" id="L265">		stringBuilder.deleteCharAt(stringBuilder.length() - 1);</span>
+<span class="fc" id="L266">		reader.close();</span>
+
+<span class="fc" id="L268">		content = stringBuilder.toString();</span>
+<span class="fc" id="L269">		return content;</span>
+	}
+
+	
+	private String createModifyProjErr() throws Exception {
+<span class="fc" id="L274">		String content = &quot;&quot;;</span>
+<span class="fc" id="L275">		BufferedReader reader = new BufferedReader(new FileReader(&quot;mock/addProjectReqErr.json&quot;));</span>
+<span class="fc" id="L276">		StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc" id="L277">		String line = null;</span>
+<span class="fc" id="L278">		String ls = System.getProperty(&quot;line.separator&quot;);</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">		while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L280">			stringBuilder.append(line);</span>
+<span class="fc" id="L281">			stringBuilder.append(ls);</span>
+		}
+		// delete the last new line separator
+<span class="fc" id="L284">		stringBuilder.deleteCharAt(stringBuilder.length() - 1);</span>
+<span class="fc" id="L285">		reader.close();</span>
+
+<span class="fc" id="L287">		content = stringBuilder.toString();</span>
+<span class="fc" id="L288">		return content;</span>
+	}
+	
+	private String createModifyProjectJson() throws Exception {
+<span class="fc" id="L292">		String content = &quot;&quot;;</span>
+<span class="fc" id="L293">		BufferedReader reader = new BufferedReader(new FileReader(&quot;mock/addProjectReq.json&quot;));</span>
+<span class="fc" id="L294">		StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc" id="L295">		String line = null;</span>
+<span class="fc" id="L296">		String ls = System.getProperty(&quot;line.separator&quot;);</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">		while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L298">			stringBuilder.append(line);</span>
+<span class="fc" id="L299">			stringBuilder.append(ls);</span>
+		}
+		// delete the last new line separator
+<span class="fc" id="L302">		stringBuilder.deleteCharAt(stringBuilder.length() - 1);</span>
+<span class="fc" id="L303">		reader.close();</span>
+
+<span class="fc" id="L305">		content = stringBuilder.toString();</span>
+<span class="fc" id="L306">		return content;</span>
+	}
+
+	private String createModifyParentTaskJson() throws Exception {
+<span class="fc" id="L310">		String content = &quot;&quot;;</span>
+<span class="fc" id="L311">		BufferedReader reader = new BufferedReader(new FileReader(&quot;mock/addParentTaskReq.json&quot;));</span>
+<span class="fc" id="L312">		StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc" id="L313">		String line = null;</span>
+<span class="fc" id="L314">		String ls = System.getProperty(&quot;line.separator&quot;);</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">		while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L316">			stringBuilder.append(line);</span>
+<span class="fc" id="L317">			stringBuilder.append(ls);</span>
+		}
+		// delete the last new line separator
+<span class="fc" id="L320">		stringBuilder.deleteCharAt(stringBuilder.length() - 1);</span>
+<span class="fc" id="L321">		reader.close();</span>
+
+<span class="fc" id="L323">		content = stringBuilder.toString();</span>
+<span class="fc" id="L324">		return content;</span>
+	}
+
+	private String createModifyTaskJson() throws Exception {
+<span class="fc" id="L328">		String content = &quot;&quot;;</span>
+<span class="fc" id="L329">		BufferedReader reader = new BufferedReader(new FileReader(&quot;mock/addTaskReq.json&quot;));</span>
+<span class="fc" id="L330">		StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc" id="L331">		String line = null;</span>
+<span class="fc" id="L332">		String ls = System.getProperty(&quot;line.separator&quot;);</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">		while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L334">			stringBuilder.append(line);</span>
+<span class="fc" id="L335">			stringBuilder.append(ls);</span>
+		}
+		// delete the last new line separator
+<span class="fc" id="L338">		stringBuilder.deleteCharAt(stringBuilder.length() - 1);</span>
+<span class="fc" id="L339">		reader.close();</span>
+
+<span class="fc" id="L341">		content = stringBuilder.toString();</span>
+<span class="fc" id="L342">		return content;</span>
+	}
+
+}
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>project-manager-server (4) (Jan 18, 2019 6:10:05 PM)</div></body></html>
