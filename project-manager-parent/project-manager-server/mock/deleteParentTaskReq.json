@@ -1,0 +1,6 @@
+{
+	"action" : "DELETE",
+	"parent" : {
+		"parentId" : 1
+	}
+}

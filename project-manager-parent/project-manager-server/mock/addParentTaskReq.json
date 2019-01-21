@@ -1,0 +1,7 @@
+{
+	"action" : "ADD",
+	"parentTask" : {
+		"parentTaskName" : "parent task A1",
+		"projectId" : 3
+	}
+}

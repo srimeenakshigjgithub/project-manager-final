@@ -1,0 +1,8 @@
+{
+	"action" : "ADD",
+	"user" : {
+		"firstName" : "sri",
+		"lastName" : "meenakshi",
+		"employeeId" : "24523"
+	}
+}

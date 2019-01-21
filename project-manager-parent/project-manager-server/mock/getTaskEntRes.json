@@ -1,0 +1,25 @@
+{
+	"taskId" : 1,
+	"parentEntity" : {
+		"parentId" : 1,
+		"parentTask" : "parentTask"
+	},
+	"projectEntity" : {
+		"projectId" : 1,
+		"project" : "projectfsdgjsm",
+		"startDate" : "2019-01-12",
+		"endDate" : "2019-01-13",
+		"userEntity" : {
+			"userId" : 1,
+			"firstName" : "fname",
+			"lastName" : "lname",
+			"employeeId" : "123456"
+		},
+		"priority" : 5
+	},
+	"task" : "task",
+	"startDate" : "2019-01-12",
+	"endDate" : "2019-01-13",
+	"priority" : 5,
+	"status" : "NEW"
+}

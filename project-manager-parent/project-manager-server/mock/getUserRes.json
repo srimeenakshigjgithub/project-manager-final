@@ -1,0 +1,11 @@
+{
+  "user": [
+    {
+      "userId": 1,
+      "firstName": "sri",
+      "lastName": "meenakshi",
+      "employeeId": "45"
+    }
+   ],
+    "status": "Success"
+}

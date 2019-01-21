@@ -1,0 +1,10 @@
+{
+	"action" : "ADD",
+	"project" : {
+		"project" : "proj 1",
+		"startDate" : "2019-01-11",
+		"endDate" : "2019-01-11",
+		"priority" : 1,
+		"employeeId" : 1
+	}
+}

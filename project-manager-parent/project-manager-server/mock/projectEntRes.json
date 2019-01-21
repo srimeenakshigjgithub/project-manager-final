@@ -1,0 +1,13 @@
+{
+	"projectId" : 1,
+	"project" : "projectfsdgjsm",
+	"startDate" : "2018-11-22",
+	"endDate" : "2018-11-23",
+	"userEntity" : {
+		"userId" : 1,
+		"firstName" : "fname",
+		"lastName" : "lname",
+		"employeeId" : "123456"
+	},
+	"priority" : 5
+}
