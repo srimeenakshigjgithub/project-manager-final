@@ -1,0 +1,30 @@
+<div [hidden]='techError'>
+    <div class="row">
+		<div class="col-md-6 col-sm-12 col-xs-12">
+			<div class="row">
+				<div class="col-md-2 col-sm-12 col-xs-12">
+					<label for="project" class="control-label label-font margin-left-5"><b>Project:</b></label>
+				</div>
+				<div class="col-md-7 col-sm-12 col-xs-12">		
+					<input #project="ngModel" [(ngModel)]="projectName" name="project" id ="project" class="margin-top-12 margin-bottom-10 form-control" type="text" readonly/>
+				</div>	
+				<div class="col-md-3 col-sm-12 col-xs-12">
+					<button type="button" class="btn btn-warning margin-bottom-10" (click)="getProject()">Search</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6 col-sm-12 col-xs-12">
+			<div class="row">
+				<div class="col-md-3 col-sm-12 col-xs-12">
+					<label for="sortTask" class="control-label label-font margin-bottom-10">Sort Task By:</label>
+				</div>
+				<div class="col-md-9 col-sm-12 col-xs-12">
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortTaskBy('startDate')">Start Date</button>
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortTaskBy('endDate')">End Date</button>
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortTaskBy('priority')">Priority</button>
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortTaskBy('status')">Completed</button>
+				</div>
+			</div>
+		</div>        
+    </div>

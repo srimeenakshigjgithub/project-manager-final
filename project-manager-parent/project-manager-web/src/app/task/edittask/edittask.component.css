@@ -1,0 +1,9 @@
+input[type=range] {
+    display: block; 
+     width: 30%; 
+    }
+
+.edit-header {
+    font-weight: bold;
+    color: blue;
+}

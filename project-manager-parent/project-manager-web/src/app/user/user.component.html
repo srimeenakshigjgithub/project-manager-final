@@ -1,0 +1,128 @@
+<pm-loading class="text-align-center" [hidden]="!screenLoader"></pm-loading>
+
+<div [hidden]='techError'>
+    <form #addUserForm = "ngForm" method="post" (ngSubmit)="addUser(user)" novalidate>
+		<div class="row margin-top-10" [class.hasError]="firstName.errors && (firstName.dirty || firstName.touched)">
+			<div class="col-md-2 col-sm-12 col-xs-12">
+				<label for="firstName" class="control-label label-font">First Name:</label>
+			</div>
+			<div class="col-md-4 col-sm-12 col-xs-12">
+				<input #firstName="ngModel" [(ngModel)]="user.firstName" name="firstName" id ="firstName" class="form-control" type="text" pattern = "^[a-zA-Z]+$" required aria-describedby="firstNameErrorDiv">
+				<div role="alert" aria-live="assertive" id="firstNameErrorDiv" class="error-message-cmn-cls" *ngIf="firstName.errors && (firstName.dirty || firstName.touched)">
+					<span class="fa fa-times"> </span>
+					<span class="error-msg" *ngIf="firstName.errors.required">Required.</span>
+					<span class="error-msg" *ngIf="firstName.errors.pattern">Please input characters only.</span>
+				</div>
+			</div>
+			<div class="col-md-6 col-sm-12 col-xs-12"></div>
+		</div>
+
+		<div class="row margin-top-10" [class.hasError]="lastName.errors && (lastName.dirty || lastName.touched)">
+			<div class="col-md-2 col-sm-12 col-xs-12">
+				<label for="lastName" class="control-label label-font">Last Name:</label>
+			</div>
+			<div class="col-md-4 col-sm-12 col-xs-12">
+				<input #lastName="ngModel" [(ngModel)]="user.lastName" name="lastName" id ="lastName" class="form-control" type="text" pattern = "^[a-zA-Z]+$" required aria-describedby="lastNameErrorDiv">			
+				<div role="alert" aria-live="assertive" id="llastNameErrorDiv" class="error-message-cmn-cls" *ngIf="lastName.errors && (lastName.dirty || lastName.touched)">
+					<span class="fa fa-times"> </span>
+					<span class="error-msg" *ngIf="lastName.errors.required">Required.</span>
+					<span class="error-msg" *ngIf="lastName.errors.pattern">Please enter only characters.</span>
+				</div>
+			</div>
+			<div class="col-md-6 col-sm-12 col-xs-12"></div>
+		</div>		
+
+		<div class="row margin-top-10" [class.hasError]="employeeId.errors && (employeeId.dirty || employeeId.touched)">
+			<div class="col-md-2 col-sm-12 col-xs-12">
+				<label for="employeeId" class="control-label label-font">Employee Id:</label>
+			</div>
+			<div class="col-md-4 col-sm-12 col-xs-12">
+				<input #employeeId="ngModel" [(ngModel)]="user.employeeId" name="employeeId" id ="employeeId" class="form-control" type="text" pattern="^[a-zA-Z0-9]+$" minlength="6" maxlength="6" required aria-describedby="employeeIdErrorDiv">
+				<div role="alert" aria-live="assertive" id="employeeIdErrorDiv" class="error-message-cmn-cls" *ngIf="employeeId.errors && (employeeId.dirty || employeeId.touched)">
+					<span class="fa fa-times"> </span>
+					<span class="error-msg" *ngIf="employeeId.errors.required">Required.</span>
+					<span class="error-msg" *ngIf="employeeId.errors.pattern">Please input employee id without any special characters.</span>
+				</div>			
+			</div>
+			<div class="col-md-6 col-sm-12 col-xs-12"></div>
+		</div>
+
+		<div class="row margin-top-10">
+			<div class="col-md-1 col-sm-12 col-xs-12"></div>
+			<div class="col-md-4 col-sm-12 col-xs-12 text-align-right">
+				<button type="submit" class="btn btn-info margin-right-15" [disabled]="addUserForm.form.valid && (addUserForm.form.touched || addUserForm.form.untouched)" [hidden]="!isAdd">Add</button>
+				<button type="submit" class="btn btn-info margin-right-15" [disabled]="addUserForm.form.valid && (addUserForm.form.touched || addUserForm.form.untouched)" [hidden]="isAdd">Update</button>
+				<button type="button" class="btn btn-basic" (click)="reset()">Reset</button>
+			</div>
+			<div class="col-md-6 col-sm-12 col-xs-12"></div>
+		</div>
+	</form>
+	<div class="row margin-top-5">
+		<div class="col-md-6 col-sm-12 col-xs-12">
+			<hr/>
+		</div>
+		<div class="col-md-6 col-sm-12 col-xs-12"></div>
+	</div>
+	
+	<div class="row margin-top-10">
+		<div class="col-md-2 col-sm-12 col-xs-12">
+			<input #searchUser="ngModel" [(ngModel)]="searchText" name="searchText" id ="searchText" class="form-control margin-bottom-10" type="text" required placeholder="Search..."/>
+		</div>
+		<div class="col-md-4 col-sm-12 col-xs-12">
+			<div class="row">
+				<div class="col-md-3 col-sm-12 col-xs-12">
+					<label for="sortUser" class="control-label label-font">Sort By:</label>
+				</div>
+				<div class="col-md-9 col-sm-12 col-xs-12">			
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortUser('firstName')">First Name</button>
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortUser('lastName')">Last Name</button>
+					<button type="button" class="btn btn-secondary margin-bottom-10 mx-1" (click)="sortUser('id')">Id</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-5 col-sm-12 col-xs-12"></div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6 col-sm-12 col-xs-12">
+			<ul class="list-group " *ngIf='null != userList'>
+				<li *ngFor="let usr of userList | searchFilter : searchText : 'userDetails' | sortFilter : fieldName : 'userScreen'" class="list-group-item borderless margin-top-neg-10">
+					<div class="row">
+						<div class="col-md-10 col-sm-12 col-xs-12">
+							<div class="row margin-top-10">
+								<div class="col-md-12 col-sm-12 col-xs-12 user-details-div">
+									{{usr.firstName}}
+								</div>
+							</div>
+							<div class="row margin-top-10">
+								<div class="col-md-12 col-sm-12 col-xs-12 user-details-div">
+									{{usr.lastName}}
+								</div>
+							</div>
+							<div class="row margin-top-10">
+								<div class="col-md-12 col-sm-12 col-xs-12 user-details-div">
+									{{usr.employeeId}}
+								</div>
+							</div>						
+						</div>
+						<div class="col-md-2 col-sm-12 col-xs-12">
+							<button type="button" class="btn btn-info margin-top-10 mx-1" (click)="editUser(usr)">Edit</button>
+							<button type="button" class="btn btn-basic margin-top-10 mx-1" (click)="deleteUser(usr)">Delete</button>
+						</div>
+					</div>
+					<div class="row">
+						<hr/>						
+					</div>			
+				</li>
+				
+			</ul>
+		</div>
+		<div class="col-md-6 col-sm-12 col-xs-12"></div>
+	</div>
+</div>
+
+<div [hidden]='!techError'>
+	<div class="row margin-top-30">
+		<p class="error-msg text-align-center">Sorry, our system is not working the way it should. Please try later.</p>
+	</div>
+</div>
